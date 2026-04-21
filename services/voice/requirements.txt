@@ -1,0 +1,8 @@
+openai-whisper
+openwakeword
+sounddevice
+numpy
+httpx
+keyboard
+pytest
+pytest-mock
