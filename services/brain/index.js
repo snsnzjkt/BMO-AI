@@ -24,8 +24,10 @@ app.use('/chat', chatRoute);
 app.use('/vision', visionRoute);
 app.use('/rag', ragRoute);
 
-app.listen(PORT, () => {
-  console.log(`BMO Brain service running on port ${PORT} 🎮`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`BMO Brain service running on port ${PORT} 🎮`);
+  });
+}
 
 module.exports = app;
