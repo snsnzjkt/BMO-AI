@@ -1,0 +1,18 @@
+const BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+
+async function generate(model, prompt, system = '') {
+  const response = await fetch(`${BASE_URL}/api/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, prompt, system, stream: false }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Ollama request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.response;
+}
+
+module.exports = { generate };
