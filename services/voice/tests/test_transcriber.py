@@ -25,7 +25,8 @@ def test_transcribe_returns_stripped_text():
         result = transcriber_module.transcribe(np.zeros(16000, dtype=np.float32))
 
     assert result == 'Hello BMO!'
-    mock_model.transcribe.assert_called_once()
+    _, kwargs = mock_model.transcribe.call_args
+    assert kwargs.get('fp16') is False
 
 
 def test_transcribe_returns_empty_string_on_silence():
@@ -38,12 +39,20 @@ def test_transcribe_returns_empty_string_on_silence():
     assert result == ''
 
 
-def test_transcribe_returns_empty_string_on_exception():
+def test_transcribe_returns_empty_string_on_transcription_exception():
     mock_model = MagicMock()
     mock_model.transcribe.side_effect = RuntimeError('GPU error')
 
     with patch('src.transcriber.whisper') as mock_whisper:
         mock_whisper.load_model.return_value = mock_model
+        result = transcriber_module.transcribe(np.zeros(16000, dtype=np.float32))
+
+    assert result == ''
+
+
+def test_transcribe_returns_empty_string_when_model_load_fails():
+    with patch('src.transcriber.whisper') as mock_whisper:
+        mock_whisper.load_model.side_effect = RuntimeError('model not found')
         result = transcriber_module.transcribe(np.zeros(16000, dtype=np.float32))
 
     assert result == ''

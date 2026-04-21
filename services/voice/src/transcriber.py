@@ -13,8 +13,8 @@ def _load_model():
 
 
 def transcribe(audio_array: np.ndarray) -> str:
-    model = _load_model()
     try:
+        model = _load_model()
         result = model.transcribe(audio_array, fp16=False)
         return result.get('text', '').strip()
     except Exception:
