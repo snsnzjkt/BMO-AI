@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch, MagicMock
-import subprocess
 import config
 from src.synthesizer import synthesize, SynthesisError
 

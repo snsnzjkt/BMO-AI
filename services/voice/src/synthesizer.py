@@ -15,7 +15,7 @@ def synthesize(text: str) -> bytes:
         )
         if result.returncode != 0:
             raise SynthesisError(
-                f'Piper exited with code {result.returncode}: {result.stderr.decode()}'
+                f'Piper exited with code {result.returncode}: {result.stderr.decode("utf-8", errors="replace")}'
             )
         return result.stdout
     except FileNotFoundError:
