@@ -1,15 +1,23 @@
 jest.mock('../services/ollamaClient');
-jest.mock('fs');
 
 const { generate } = require('../services/ollamaClient');
 const fs = require('fs');
 const { runChatPipeline } = require('../pipelines/chatPipeline');
 
 describe('chatPipeline.runChatPipeline', () => {
-  afterEach(() => jest.resetAllMocks());
+  let readFileSyncSpy;
+
+  beforeEach(() => {
+    readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
+  });
+
+  afterEach(() => {
+    readFileSyncSpy.mockRestore();
+    jest.resetAllMocks();
+  });
 
   it('returns Gemma response using the system prompt from file', async () => {
-    fs.readFileSync.mockReturnValue('You are BMO!');
+    readFileSyncSpy.mockReturnValue('You are BMO!');
     generate.mockResolvedValue('Beep boop, hello friend!');
 
     const result = await runChatPipeline('Hello!');
@@ -23,7 +31,7 @@ describe('chatPipeline.runChatPipeline', () => {
   });
 
   it('trims whitespace from the system prompt file content', async () => {
-    fs.readFileSync.mockReturnValue('   You are BMO!   \n');
+    readFileSyncSpy.mockReturnValue('   You are BMO!   \n');
     generate.mockResolvedValue('Hi!');
 
     await runChatPipeline('Hey');
@@ -32,7 +40,7 @@ describe('chatPipeline.runChatPipeline', () => {
   });
 
   it('falls back to a default prompt when the system prompt file is unreadable', async () => {
-    fs.readFileSync.mockImplementation(() => { throw new Error('ENOENT'); });
+    readFileSyncSpy.mockImplementation(() => { throw new Error('ENOENT'); });
     generate.mockResolvedValue('Hi there!');
 
     const result = await runChatPipeline('Hello!');
@@ -43,5 +51,12 @@ describe('chatPipeline.runChatPipeline', () => {
       'Hello!',
       'You are BMO, a cheerful and playful AI assistant.'
     );
+  });
+
+  it('propagates errors from generate without catching them', async () => {
+    readFileSyncSpy.mockReturnValue('You are BMO!');
+    generate.mockRejectedValue(new Error('ECONNREFUSED'));
+
+    await expect(runChatPipeline('Hello!')).rejects.toThrow('ECONNREFUSED');
   });
 });
