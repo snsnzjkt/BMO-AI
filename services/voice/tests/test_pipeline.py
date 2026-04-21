@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import main  # noqa: E402 — must come after sys.path setup above
 from src.brain_client import BrainServiceError
 from src.synthesizer import SynthesisError
+from src.recorder import RecordingError
 
 
 @pytest.fixture(autouse=True)
@@ -91,3 +92,36 @@ def test_pipeline_continues_when_synthesis_fails(mocker):
         main.run_pipeline()
 
     mock_play.assert_not_called()
+
+
+def test_pipeline_continues_when_recording_fails(mocker):
+    """RecordingError → log error, loop continues to next wake word."""
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
+    mocker.patch('src.recorder.record', side_effect=RecordingError('mic disconnected'))
+    mock_chat = mocker.patch('src.brain_client.chat')
+    mocker.patch('main._validate')
+
+    with pytest.raises(KeyboardInterrupt):
+        main.run_pipeline()
+
+    mock_chat.assert_not_called()
+
+
+def test_pipeline_continues_when_listen_raises(mocker):
+    """RuntimeError from wake_word.listen → log error, loop retries."""
+    call_count = {'n': 0}
+
+    def mock_listen():
+        call_count['n'] += 1
+        if call_count['n'] == 1:
+            raise RuntimeError('Listen timeout')
+        raise KeyboardInterrupt
+
+    mocker.patch('src.wake_word.listen', side_effect=mock_listen)
+    mock_record = mocker.patch('src.recorder.record')
+    mocker.patch('main._validate')
+
+    with pytest.raises(KeyboardInterrupt):
+        main.run_pipeline()
+
+    mock_record.assert_not_called()

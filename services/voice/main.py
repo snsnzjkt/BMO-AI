@@ -32,10 +32,19 @@ def run_pipeline() -> None:
     log.info('BMO is ready! Listening for wake word or press [%s]...', config.PTT_KEY)
 
     while True:
-        trigger = wake_word.listen()
-        log.info('Triggered by: %s', trigger)
+        try:
+            trigger = wake_word.listen()
+            log.info('Triggered by: %s', trigger)
+        except RuntimeError as e:
+            log.error('Wake word listener error: %s — retrying...', e)
+            continue
 
-        audio = recorder.record()
+        try:
+            audio = recorder.record()
+        except recorder.RecordingError as e:
+            log.error('Recording failed: %s — retrying...', e)
+            continue
+
         text = transcriber.transcribe(audio)
 
         if not text:

@@ -57,6 +57,9 @@ def listen() -> str:
 
     try:
         result = result_queue.get(timeout=LISTEN_TIMEOUT)
+    except queue.Empty:
+        log.warning('Listen timeout after %.0fs, restarting listener', LISTEN_TIMEOUT)
+        result = 'timeout'
     finally:
         stop_event.set()
         keyboard.remove_hotkey(hotkey)
@@ -64,6 +67,9 @@ def listen() -> str:
 
     if result == 'error':
         raise RuntimeError('Wake word detection failed — check hardware and model config')
+
+    if result == 'timeout':
+        raise RuntimeError(f'Listen timeout after {LISTEN_TIMEOUT:.0f}s — no trigger received')
 
     log.info('Triggered by: %s', result)
     return result
