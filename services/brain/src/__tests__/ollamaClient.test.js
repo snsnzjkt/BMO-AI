@@ -7,6 +7,7 @@ describe('ollamaClient.generate', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+    delete global.fetch;
   });
 
   it('sends a POST request to Ollama and returns response text', async () => {

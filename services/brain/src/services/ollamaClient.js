@@ -12,6 +12,9 @@ async function generate(model, prompt, system = '') {
   }
 
   const data = await response.json();
+  if (data.response === undefined) {
+    throw new Error('Ollama response missing "response" field');
+  }
   return data.response;
 }
 
