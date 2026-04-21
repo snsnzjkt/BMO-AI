@@ -3,8 +3,9 @@ const { generate } = require('./ollamaClient');
 const VALID_INTENTS = ['chat', 'rag', 'vision', 'camera', 'web'];
 
 function buildClassificationPrompt(text) {
+  const labels = VALID_INTENTS.join(', ');
   return (
-    `Classify the following message into exactly one of: chat, rag, vision, camera, web.\n` +
+    `Classify the following message into exactly one of: ${labels}.\n` +
     `Reply with only that single word — no punctuation, no explanation.\n\n` +
     `Message: "${text}"`
   );

@@ -24,10 +24,18 @@ describe('intentRouter.classifyIntent', () => {
     expect(intent).toBe('chat');
   });
 
-  it('passes a prompt that contains the user text', async () => {
+  it('passes a prompt containing the user text and all valid intent labels', async () => {
     generate.mockResolvedValue('chat');
     await classifyIntent('tell me a joke');
     const calledPrompt = generate.mock.calls[0][1];
     expect(calledPrompt).toContain('tell me a joke');
+    for (const label of ['chat', 'rag', 'vision', 'camera', 'web']) {
+      expect(calledPrompt).toContain(label);
+    }
+  });
+
+  it('propagates errors from generate (Ollama unreachable)', async () => {
+    generate.mockRejectedValue(new Error('ECONNREFUSED'));
+    await expect(classifyIntent('hello')).rejects.toThrow('ECONNREFUSED');
   });
 });
