@@ -3,8 +3,12 @@ import numpy as np
 import sys
 import os
 
-# Ensure services/voice/ is on path for 'import main'
+# conftest.py covers src.* — this insert is specifically for 'import main'
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import main  # noqa: E402 — must come after sys.path setup above
+from src.brain_client import BrainServiceError
+from src.synthesizer import SynthesisError
 
 
 @pytest.fixture(autouse=True)
@@ -13,17 +17,20 @@ def set_required_env(monkeypatch):
     monkeypatch.setenv('BRAIN_URL', 'http://localhost:3001')
 
 
+def _make_listen(n_calls=1, trigger='wake_word'):
+    """Returns a mock_listen that fires `trigger` on call 1, then KeyboardInterrupt."""
+    count = {'n': 0}
+    def mock_listen():
+        count['n'] += 1
+        if count['n'] > n_calls:
+            raise KeyboardInterrupt
+        return trigger
+    return mock_listen
+
+
 def test_pipeline_runs_full_happy_path(mocker):
     """Wake word fires → record → transcribe → chat → synthesize → play → loop back."""
-    call_count = {'n': 0}
-
-    def mock_listen():
-        call_count['n'] += 1
-        if call_count['n'] > 1:
-            raise KeyboardInterrupt
-        return 'wake_word'
-
-    mocker.patch('src.wake_word.listen', side_effect=mock_listen)
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
     mocker.patch('src.recorder.record', return_value=np.zeros(16000, dtype=np.float32))
     mocker.patch('src.transcriber.transcribe', return_value='Hello BMO!')
     mock_chat = mocker.patch('src.brain_client.chat', return_value='Hi there friend!')
@@ -31,7 +38,6 @@ def test_pipeline_runs_full_happy_path(mocker):
     mock_play = mocker.patch('src.player.play')
     mocker.patch('main._validate')
 
-    import main
     with pytest.raises(KeyboardInterrupt):
         main.run_pipeline()
 
@@ -42,21 +48,12 @@ def test_pipeline_runs_full_happy_path(mocker):
 
 def test_pipeline_skips_when_transcription_is_empty(mocker):
     """Empty transcription → skip brain call, loop back immediately."""
-    call_count = {'n': 0}
-
-    def mock_listen():
-        call_count['n'] += 1
-        if call_count['n'] > 1:
-            raise KeyboardInterrupt
-        return 'ptt'
-
-    mocker.patch('src.wake_word.listen', side_effect=mock_listen)
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='ptt'))
     mocker.patch('src.recorder.record', return_value=np.zeros(16000, dtype=np.float32))
     mocker.patch('src.transcriber.transcribe', return_value='')
     mock_chat = mocker.patch('src.brain_client.chat')
     mocker.patch('main._validate')
 
-    import main
     with pytest.raises(KeyboardInterrupt):
         main.run_pipeline()
 
@@ -65,17 +62,7 @@ def test_pipeline_skips_when_transcription_is_empty(mocker):
 
 def test_pipeline_plays_fallback_when_brain_unavailable(mocker):
     """BrainServiceError → synthesize + play the fallback message."""
-    from src.brain_client import BrainServiceError
-
-    call_count = {'n': 0}
-
-    def mock_listen():
-        call_count['n'] += 1
-        if call_count['n'] > 1:
-            raise KeyboardInterrupt
-        return 'wake_word'
-
-    mocker.patch('src.wake_word.listen', side_effect=mock_listen)
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
     mocker.patch('src.recorder.record', return_value=np.zeros(16000, dtype=np.float32))
     mocker.patch('src.transcriber.transcribe', return_value='Hello!')
     mocker.patch('src.brain_client.chat', side_effect=BrainServiceError('down'))
@@ -83,9 +70,24 @@ def test_pipeline_plays_fallback_when_brain_unavailable(mocker):
     mock_play = mocker.patch('src.player.play')
     mocker.patch('main._validate')
 
-    import main
     with pytest.raises(KeyboardInterrupt):
         main.run_pipeline()
 
     mock_synthesize.assert_called_once_with(main.FALLBACK_MESSAGE)
     mock_play.assert_called_once_with(b'\x00')
+
+
+def test_pipeline_continues_when_synthesis_fails(mocker):
+    """SynthesisError → log error, skip playback, loop continues."""
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
+    mocker.patch('src.recorder.record', return_value=np.zeros(16000, dtype=np.float32))
+    mocker.patch('src.transcriber.transcribe', return_value='Hello!')
+    mocker.patch('src.brain_client.chat', return_value='Hi!')
+    mocker.patch('src.synthesizer.synthesize', side_effect=SynthesisError('piper crashed'))
+    mock_play = mocker.patch('src.player.play')
+    mocker.patch('main._validate')
+
+    with pytest.raises(KeyboardInterrupt):
+        main.run_pipeline()
+
+    mock_play.assert_not_called()
