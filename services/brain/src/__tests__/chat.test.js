@@ -26,7 +26,13 @@ describe('POST /chat', () => {
     expect(res.body.error).toBe('BMO needs something to think about!');
   });
 
-  it('returns text, intent, and model on success', async () => {
+  it('returns 400 when text is a non-string truthy value', async () => {
+    const res = await request(app).post('/chat').send({ text: 42 });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('BMO needs something to think about!');
+  });
+
+  it('returns text, intent, and model on success and calls pipelines with the original text', async () => {
     classifyIntent.mockResolvedValue('chat');
     runChatPipeline.mockResolvedValue('Beep boop! I am BMO.');
 
@@ -38,6 +44,8 @@ describe('POST /chat', () => {
       intent: 'chat',
       model: 'gemma3',
     });
+    expect(classifyIntent).toHaveBeenCalledWith('Hello BMO!');
+    expect(runChatPipeline).toHaveBeenCalledWith('Hello BMO!');
   });
 
   it('returns 503 when intentRouter throws (Ollama unreachable)', async () => {
