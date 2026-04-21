@@ -4,6 +4,12 @@ const { runChatPipeline } = require('../pipelines/chatPipeline');
 
 const router = Router();
 
+// Maps intent labels to pipeline functions.
+// Phase 2+: register new pipelines here alongside their route files.
+const PIPELINES = {
+  chat: runChatPipeline,
+};
+
 router.post('/', async (req, res) => {
   const { text } = req.body ?? {};
 
@@ -13,7 +19,8 @@ router.post('/', async (req, res) => {
 
   try {
     const intent = await classifyIntent(text);
-    const responseText = await runChatPipeline(text);
+    const pipeline = PIPELINES[intent] ?? runChatPipeline;
+    const responseText = await pipeline(text);
     res.json({ text: responseText, intent, model: process.env.LLM_MODEL || 'gemma3' });
   } catch (err) {
     console.error('[chat route] pipeline error:', err);

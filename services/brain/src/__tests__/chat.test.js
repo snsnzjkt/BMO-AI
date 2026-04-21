@@ -12,7 +12,16 @@ app.use(express.json());
 app.use('/chat', chatRoute);
 
 describe('POST /chat', () => {
-  afterEach(() => jest.resetAllMocks());
+  let consoleErrorSpy;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    jest.resetAllMocks();
+  });
 
   it('returns 400 when text field is missing', async () => {
     const res = await request(app).post('/chat').send({});
@@ -48,6 +57,17 @@ describe('POST /chat', () => {
     expect(runChatPipeline).toHaveBeenCalledWith('Hello BMO!');
   });
 
+  it('falls back to chat pipeline for unregistered intents', async () => {
+    classifyIntent.mockResolvedValue('camera');
+    runChatPipeline.mockResolvedValue('BMO looks around...');
+
+    const res = await request(app).post('/chat').send({ text: 'take a picture' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.intent).toBe('camera');
+    expect(runChatPipeline).toHaveBeenCalledWith('take a picture');
+  });
+
   it('returns 503 when intentRouter throws (Ollama unreachable)', async () => {
     classifyIntent.mockRejectedValue(new Error('ECONNREFUSED'));
 
@@ -55,6 +75,7 @@ describe('POST /chat', () => {
 
     expect(res.status).toBe(503);
     expect(res.body.error).toBe("BMO's brain is sleeping... try again!");
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[chat route] pipeline error:', expect.any(Error));
   });
 
   it('returns 503 when chatPipeline throws', async () => {
@@ -65,5 +86,6 @@ describe('POST /chat', () => {
 
     expect(res.status).toBe(503);
     expect(res.body.error).toBe("BMO's brain is sleeping... try again!");
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[chat route] pipeline error:', expect.any(Error));
   });
 });
