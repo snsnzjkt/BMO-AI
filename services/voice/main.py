@@ -2,8 +2,11 @@ import sys
 import os
 import shutil
 import logging
+from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
 import config
 from src import wake_word, recorder, transcriber, brain_client, synthesizer, player
@@ -17,7 +20,8 @@ FALLBACK_MESSAGE = "BMO's brain is sleeping... please try again later!"
 def _validate() -> None:
     if config.PIPER_MODEL_PATH is None:
         sys.exit('ERROR: PIPER_MODEL_PATH environment variable is required.')
-    if shutil.which(config.PIPER_BINARY) is None:
+    piper_found = shutil.which(config.PIPER_BINARY) or os.path.isfile(config.PIPER_BINARY)
+    if not piper_found:
         sys.exit(f'ERROR: Piper binary not found: {config.PIPER_BINARY}')
     try:
         import sounddevice as sd
