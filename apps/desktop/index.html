@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beemo</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --teal:        #3DBCB8;
+  --teal-light:  #B5DDD6;
+  --teal-dark:   #1A7A78;
+  --outline:     #0D2E2C;
+  --screen-bg:   #A8D8CC;
+  --yellow:      #F5C530;
+  --blue-mid:    #1A5FA0;
+  --blue-tri:    #5BB8E8;
+  --green-sm:    #52C83A;
+  --red-power:   #E83030;
+  --slot-color:  #1A7A78;
+  --body-bg:     #07151E;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--body-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  overflow: hidden;
+  cursor: default;
+  user-select: none;
+}
+
+/* ── STARS ── */
+.stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+}
+@keyframes twinkle {
+  0%,100% { opacity: .15; transform: scale(1); }
+  50%      { opacity: .9;  transform: scale(1.4); }
+}
+
+/* ── SCENE ── */
+.scene {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+/* ── BEEMO BODY ── */
+.beemo {
+  width: 310px;
+  height: 455px;
+  background: var(--teal);
+  border-radius: 34px;
+  border: 6px solid var(--outline);
+  position: relative;
+  box-shadow:
+    inset 0 3px 6px rgba(255,255,255,.25),
+    0 0 50px rgba(61,188,184,.45),
+    0 8px 40px rgba(0,0,0,.6);
+  animation: breathe 3.5s ease-in-out infinite;
+  transition: filter 1.2s ease, box-shadow 1.2s ease, animation-play-state 1.2s;
+}
+.beemo.off {
+  filter: grayscale(1) brightness(.6);
+  box-shadow: 0 8px 40px rgba(0,0,0,.6);
+  animation-play-state: paused;
+}
+@keyframes breathe {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-4px) scale(1.008); }
+}
+
+/* subtle highlight stripe */
+.beemo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  background: linear-gradient(160deg, rgba(255,255,255,.18) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* ── SCREEN ── */
+.screen {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  height: 200px;
+  background: var(--screen-bg);
+  border-radius: 20px;
+  border: 5px solid var(--outline);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 4px 12px rgba(0,0,0,.18);
+  transition: background 1.2s ease;
+}
+.beemo.off .screen {
+  background: #555;
+}
+
+/* scanlines */
+.screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,.06) 3px,
+    rgba(0,0,0,.06) 4px
+  );
+  pointer-events: none;
+  border-radius: 14px;
+}
+
+/* ── FACE SVG ── */
+.face-svg {
+  width: 220px;
+  height: 155px;
+  overflow: visible;
+}
+
+/* Eye blink */
+@keyframes blink {
+  0%,90%,100% { transform: scaleY(1); }
+  95%          { transform: scaleY(.07); }
+}
+.eye-l { transform-origin: 72px 52px; animation: blink 5s ease-in-out infinite; }
+.eye-r { transform-origin: 148px 52px; animation: blink 5s ease-in-out infinite .07s; }
+.beemo.off .eye-l,
+.beemo.off .eye-r { animation: none; }
+
+/* ── MID CONTROLS ── */
+.mid-row {
+  position: absolute;
+  top: 234px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.slot {
+  flex: 1;
+  height: 28px;
+  background: var(--slot-color);
+  border-radius: 14px;
+  border: 4px solid var(--outline);
+  box-shadow: inset 0 3px 5px rgba(0,0,0,.3), 0 2px 0 rgba(255,255,255,.1);
+}
+.dot-blue {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #4488CC, #0D3F6E);
+  border: 4px solid var(--outline);
+  box-shadow: 0 3px 0 var(--outline), inset 0 1px 3px rgba(255,255,255,.25);
+  flex-shrink: 0;
+}
+
+/* ── LOWER CONTROLS ── */
+.lower-row {
+  position: absolute;
+  top: 283px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* D-PAD */
+.dpad {
+  width: 92px; height: 92px;
+  position: relative;
+}
+.dpad-arm {
+  position: absolute;
+  background: linear-gradient(180deg, #FFDD55, #D4A818);
+  border: 4px solid var(--outline);
+  border-radius: 6px;
+}
+.dpad-h { width: 92px; height: 29px; top: 50%; left: 0; transform: translateY(-50%); }
+.dpad-v { width: 29px; height: 92px; left: 50%; top: 0; transform: translateX(-50%); }
+/* center cap */
+.dpad::after {
+  content: '';
+  position: absolute;
+  width: 29px; height: 29px;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  background: linear-gradient(135deg, #FFDD55, #C49010);
+  border: 4px solid var(--outline);
+  border-radius: 4px;
+}
+
+/* RIGHT CLUSTER */
+.right-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.tri-wrap {
+  line-height: 0;
+}
+.tri-wrap svg { display: block; }
+.dot-green {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #72E055, #2A8A18);
+  border: 4px solid var(--outline);
+  box-shadow: 0 3px 0 var(--outline);
+}
+
+/* ── BOTTOM CONTROLS ── */
+.bottom-row {
+  position: absolute;
+  bottom: 24px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dashes {
+  display: flex;
+  gap: 9px;
+}
+.dash {
+  width: 44px; height: 17px;
+  background: linear-gradient(180deg, #4488CC, #0D3F6E);
+  border-radius: 9px;
+  border: 3px solid var(--outline);
+}
+
+/* ── POWER BUTTON ── */
+.power-btn {
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #FF6A6A, #AA1010);
+  border: 5px solid var(--outline);
+  box-shadow:
+    0 6px 0 var(--outline),
+    0 8px 20px rgba(0,0,0,.5),
+    inset 0 2px 5px rgba(255,180,180,.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .12s, box-shadow .12s;
+  position: relative;
+  z-index: 2;
+}
+.power-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 0 var(--outline),
+    0 12px 28px rgba(230,50,50,.4),
+    inset 0 2px 5px rgba(255,180,180,.4);
+}
+.power-btn:active {
+  transform: translateY(5px);
+  box-shadow:
+    0 1px 0 var(--outline),
+    0 2px 8px rgba(0,0,0,.4),
+    inset 0 2px 5px rgba(255,180,180,.4);
+}
+/* power icon */
+.power-icon {
+  width: 24px; height: 24px;
+  border: 3.5px solid rgba(255,255,255,.85);
+  border-radius: 50%;
+  border-top-color: transparent;
+  position: relative;
+}
+.power-icon::after {
+  content: '';
+  position: absolute;
+  top: -9px; left: 50%;
+  transform: translateX(-50%);
+  width: 3.5px; height: 11px;
+  background: rgba(255,255,255,.85);
+  border-radius: 2px;
+}
+
+/* ── STATUS BAR ── */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--teal-light);
+  letter-spacing: 2px;
+  transition: color 1.2s;
+}
+.status-bar.off { color: #555; }
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green-sm);
+  box-shadow: 0 0 8px var(--green-sm);
+  animation: pulse-dot 2s ease-in-out infinite;
+  transition: background 1.2s, box-shadow 1.2s;
+}
+.status-bar.off .status-dot {
+  background: #444;
+  box-shadow: none;
+  animation: none;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .5; transform: scale(.8); }
+}
+
+/* screen flash on toggle */
+@keyframes screen-flash {
+  0%   { background: white; }
+  100% { background: var(--screen-bg); }
+}
+.screen.flash { animation: screen-flash .35s ease-out; }
+
+/* floating particles */
+@keyframes float-up {
+  0%   { transform: translateY(0) translateX(0); opacity: .7; }
+  100% { transform: translateY(-120px) translateX(var(--dx,10px)); opacity: 0; }
+}
+.particle {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal-light);
+  animation: float-up 2s ease-out infinite;
+  pointer-events: none;
+  bottom: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- Stars background -->
+<div class="stars" id="stars"></div>
+
+<div class="scene">
+  <!-- BEEMO BODY -->
+  <div class="beemo" id="beemo">
+
+    <!-- SCREEN -->
+    <div class="screen" id="screen">
+      <svg class="face-svg" viewBox="0 0 220 155" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Mouth clip: smile-curve boundary -->
+          <clipPath id="mouthClip">
+            <path d="M 34 80 Q 110 52 186 80 L 186 160 L 34 160 Z"/>
+          </clipPath>
+          <!-- Teeth clip: just the thin strip at top of mouth -->
+          <clipPath id="teethClip">
+            <path d="M 34 80 Q 110 52 186 80 L 186 106 L 34 106 Z"/>
+          </clipPath>
+        </defs>
+
+        <!-- ── HAPPY FACE ── -->
+        <g id="happy-face">
+          <!-- Left eye -->
+          <ellipse class="eye-l" cx="72" cy="52" rx="15" ry="16" fill="#0D2E2C"/>
+          <!-- Right eye -->
+          <ellipse class="eye-r" cx="148" cy="52" rx="15" ry="16" fill="#0D2E2C"/>
+          <!-- Mouth dark fill -->
+          <ellipse cx="110" cy="115" rx="76" ry="52" fill="#0D2E2C" clip-path="url(#mouthClip)"/>
+          <!-- Teeth -->
+          <rect x="50"  y="78" width="34" height="26" rx="5" fill="white" clip-path="url(#teethClip)"/>
+          <rect x="88"  y="75" width="34" height="28" rx="5" fill="white" clip-path="url(#teethClip)"/>
+          <rect x="126" y="78" width="30" height="26" rx="5" fill="white" clip-path="url(#teethClip)"/>
+        </g>
+
+        <!-- ── SLEEPING FACE ── -->
+        <g id="sleep-face" display="none">
+          <!-- Closed left eye (arc) -->
+          <path d="M 52 54 Q 72 38 92 54" stroke="#0D2E2C" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- Closed right eye (arc) -->
+          <path d="M 128 54 Q 148 38 168 54" stroke="#0D2E2C" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- Small neutral mouth -->
+          <path d="M 90 105 Q 110 118 130 105" stroke="#0D2E2C" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <!-- ZZZ text -->
+          <text x="155" y="38" fill="#0D2E2C" font-family="Nunito, sans-serif" font-weight="900" font-size="14" opacity=".6">z</text>
+          <text x="163" y="26" fill="#0D2E2C" font-family="Nunito, sans-serif" font-weight="900" font-size="16" opacity=".5">z</text>
+          <text x="172" y="13" fill="#0D2E2C" font-family="Nunito, sans-serif" font-weight="900" font-size="18" opacity=".4">z</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- MID ROW: slot + blue dot -->
+    <div class="mid-row">
+      <div class="slot"></div>
+      <div class="dot-blue"></div>
+    </div>
+
+    <!-- LOWER ROW: d-pad + right cluster -->
+    <div class="lower-row">
+      <!-- D-pad -->
+      <div class="dpad">
+        <div class="dpad-arm dpad-h"></div>
+        <div class="dpad-arm dpad-v"></div>
+      </div>
+
+      <!-- Right cluster: triangle + green dot -->
+      <div class="right-cluster">
+        <div class="tri-wrap">
+          <svg width="58" height="52" viewBox="0 0 58 52">
+            <polygon points="29,3 55,49 3,49" fill="#5BB8E8" stroke="#0D2E2C" stroke-width="5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="dot-green"></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW: dashes + power -->
+    <div class="bottom-row">
+      <div class="dashes">
+        <div class="dash"></div>
+        <div class="dash"></div>
+      </div>
+
+      <div class="power-btn" id="powerBtn" title="Power">
+        <div class="power-icon"></div>
+      </div>
+    </div>
+
+  </div><!-- /beemo -->
+
+  <!-- STATUS BAR -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">BEEMO ONLINE</span>
+  </div>
+
+</div><!-- /scene -->
+
+<script>
+/* ── STARS ── */
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 80; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2.5 + 0.5;
+  s.style.cssText = `
+    width:${size}px; height:${size}px;
+    top:${Math.random()*100}%;
+    left:${Math.random()*100}%;
+    --d:${(Math.random()*3+2).toFixed(1)}s;
+    --delay:-${(Math.random()*5).toFixed(1)}s;
+  `;
+  starsEl.appendChild(s);
+}
+
+/* ── POWER TOGGLE ── */
+const beemo     = document.getElementById('beemo');
+const screen    = document.getElementById('screen');
+const statusBar = document.getElementById('statusBar');
+const statusTxt = document.getElementById('statusText');
+const happyFace = document.getElementById('happy-face');
+const sleepFace = document.getElementById('sleep-face');
+const powerBtn  = document.getElementById('powerBtn');
+
+let isOn = true;
+
+powerBtn.addEventListener('click', () => {
+  isOn = !isOn;
+
+  /* flash the screen briefly */
+  screen.classList.add('flash');
+  screen.addEventListener('animationend', () => screen.classList.remove('flash'), { once: true });
+
+  if (isOn) {
+    beemo.classList.remove('off');
+    statusBar.classList.remove('off');
+    statusTxt.textContent = 'BEEMO ONLINE';
+    setTimeout(() => {
+      happyFace.removeAttribute('display');
+      sleepFace.setAttribute('display', 'none');
+    }, 300);
+  } else {
+    beemo.classList.add('off');
+    statusBar.classList.add('off');
+    statusTxt.textContent = 'BEEMO OFFLINE';
+    setTimeout(() => {
+      sleepFace.removeAttribute('display');
+      happyFace.setAttribute('display', 'none');
+    }, 300);
+  }
+});
+
+/* ── FLOATING PARTICLES (only when on) ── */
+function spawnParticle() {
+  if (!isOn) return;
+  const p = document.createElement('div');
+  p.className = 'particle';
+  const x = 20 + Math.random() * 270;
+  const dx = (Math.random() - .5) * 40;
+  p.style.cssText = `
+    left:${x}px;
+    --dx:${dx}px;
+    animation-duration:${(Math.random()*1.5+1.2).toFixed(2)}s;
+    animation-delay:-${(Math.random()*2).toFixed(2)}s;
+    width:${(Math.random()*4+3).toFixed(1)}px;
+    height:${(Math.random()*4+3).toFixed(1)}px;
+    opacity:${(Math.random()*0.4+0.2).toFixed(2)};
+  `;
+  beemo.appendChild(p);
+  setTimeout(() => p.remove(), 2500);
+}
+setInterval(spawnParticle, 800);
+</script>
+</body>
+</html>
