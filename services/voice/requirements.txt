@@ -1,8 +1,9 @@
-openai-whisper
+faster-whisper
 openwakeword
 sounddevice
 numpy
 httpx
 keyboard
+python-dotenv
 pytest
 pytest-mock
