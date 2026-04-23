@@ -21,7 +21,7 @@ def test_synthesize_returns_wav_bytes():
 
     assert result == fake_wav
     mock_run.assert_called_once_with(
-        ['piper', '--model', '/fake/model.onnx'],
+        ['piper', '--model', '/fake/model.onnx', '--output_file', '-'],
         input=b'Hello BMO!',
         capture_output=True,
     )

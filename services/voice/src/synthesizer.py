@@ -9,7 +9,8 @@ class SynthesisError(Exception):
 def synthesize(text: str) -> bytes:
     try:
         result = subprocess.run(
-            [config.PIPER_BINARY, '--model', config.PIPER_MODEL_PATH],
+            [config.PIPER_BINARY, '--model', config.PIPER_MODEL_PATH,
+             '--output_file', '-'],
             input=text.encode('utf-8'),
             capture_output=True,
         )

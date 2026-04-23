@@ -21,8 +21,8 @@ def record() -> np.ndarray:
     chunk_samples = int(SAMPLE_RATE * CHUNK_DURATION)
     max_chunks = int(MAX_DURATION / CHUNK_DURATION)
 
-    log.debug('Recording started (silence threshold=%.3f, limit=%.1fs)',
-              config.SILENCE_THRESHOLD, config.SILENCE_DURATION)
+    log.debug('Recording started (device=%s, threshold=%.3f, limit=%.1fs)',
+              config.AUDIO_DEVICE, config.SILENCE_THRESHOLD, config.SILENCE_DURATION)
     try:
         with sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype='float32') as stream:
             while True:
