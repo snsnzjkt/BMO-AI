@@ -1,23 +1,32 @@
-import subprocess
+import io
+import logging
+import wave
 import config
+from piper import PiperVoice
+
+log = logging.getLogger(__name__)
+
+_voice = None
 
 
 class SynthesisError(Exception):
     pass
 
 
+def _get_voice():
+    global _voice
+    if _voice is None:
+        log.info('Loading Piper voice model: %s', config.PIPER_MODEL_PATH)
+        _voice = PiperVoice.load(config.PIPER_MODEL_PATH)
+    return _voice
+
+
 def synthesize(text: str) -> bytes:
     try:
-        result = subprocess.run(
-            [config.PIPER_BINARY, '--model', config.PIPER_MODEL_PATH,
-             '--output_file', '-'],
-            input=text.encode('utf-8'),
-            capture_output=True,
-        )
-        if result.returncode != 0:
-            raise SynthesisError(
-                f'Piper exited with code {result.returncode}: {result.stderr.decode("utf-8", errors="replace")}'
-            )
-        return result.stdout
-    except FileNotFoundError:
-        raise SynthesisError(f'Piper binary not found: {config.PIPER_BINARY}')
+        voice = _get_voice()
+        wav_io = io.BytesIO()
+        with wave.open(wav_io, 'wb') as wav_file:
+            voice.synthesize_wav(text, wav_file)  # set_wav_format=True by default
+        return wav_io.getvalue()
+    except Exception as e:
+        raise SynthesisError(f'Piper synthesis failed: {e}') from e

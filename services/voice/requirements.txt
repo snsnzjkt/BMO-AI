@@ -1,4 +1,5 @@
 faster-whisper
+piper-tts
 openwakeword
 sounddevice
 numpy

@@ -1,43 +1,73 @@
+import io
+import wave
 import pytest
 from unittest.mock import patch, MagicMock
 import config
+import src.synthesizer as synthesizer_module
 from src.synthesizer import synthesize, SynthesisError
 
 
 @pytest.fixture(autouse=True)
+def reset_voice_cache():
+    synthesizer_module._voice = None
+    yield
+    synthesizer_module._voice = None
+
+
+@pytest.fixture(autouse=True)
 def set_piper_config(monkeypatch):
-    monkeypatch.setattr(config, 'PIPER_BINARY', 'piper')
     monkeypatch.setattr(config, 'PIPER_MODEL_PATH', '/fake/model.onnx')
 
 
-def test_synthesize_returns_wav_bytes():
-    fake_wav = b'RIFF\x24\x00\x00\x00WAVEfmt '
-    mock_result = MagicMock()
-    mock_result.returncode = 0
-    mock_result.stdout = fake_wav
+def _make_fake_voice(sample_rate=22050):
+    """Returns a mock PiperVoice whose synthesize_wav writes a minimal valid WAV."""
+    def fake_synthesize_wav(text, wav_file, **kwargs):
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(sample_rate)
+        wav_file.writeframes(b'\x00' * 200)
 
-    with patch('src.synthesizer.subprocess.run', return_value=mock_result) as mock_run:
+    mock_voice = MagicMock()
+    mock_voice.synthesize_wav.side_effect = fake_synthesize_wav
+    return mock_voice
+
+
+def test_synthesize_returns_wav_bytes():
+    mock_voice = _make_fake_voice()
+
+    with patch('src.synthesizer.PiperVoice') as mock_pv:
+        mock_pv.load.return_value = mock_voice
         result = synthesize('Hello BMO!')
 
-    assert result == fake_wav
-    mock_run.assert_called_once_with(
-        ['piper', '--model', '/fake/model.onnx', '--output_file', '-'],
-        input=b'Hello BMO!',
-        capture_output=True,
-    )
+    assert isinstance(result, bytes)
+    assert len(result) > 44  # more than just a WAV header
+    mock_pv.load.assert_called_once_with('/fake/model.onnx')
+    mock_voice.synthesize_wav.assert_called_once()
 
 
-def test_synthesize_raises_on_nonzero_exit():
-    mock_result = MagicMock()
-    mock_result.returncode = 1
-    mock_result.stderr = b'model not found'
+def test_synthesize_raises_on_voice_error():
+    mock_voice = MagicMock()
+    mock_voice.synthesize_wav.side_effect = RuntimeError('synthesis failed')
 
-    with patch('src.synthesizer.subprocess.run', return_value=mock_result):
-        with pytest.raises(SynthesisError, match='Piper exited with code 1'):
+    with patch('src.synthesizer.PiperVoice') as mock_pv:
+        mock_pv.load.return_value = mock_voice
+        with pytest.raises(SynthesisError, match='synthesis failed'):
             synthesize('Hello!')
 
 
-def test_synthesize_raises_when_piper_binary_missing():
-    with patch('src.synthesizer.subprocess.run', side_effect=FileNotFoundError):
-        with pytest.raises(SynthesisError, match='Piper binary not found'):
+def test_synthesize_raises_when_model_load_fails():
+    with patch('src.synthesizer.PiperVoice') as mock_pv:
+        mock_pv.load.side_effect = RuntimeError('model not found')
+        with pytest.raises(SynthesisError, match='model not found'):
             synthesize('Hello!')
+
+
+def test_voice_is_loaded_once_and_cached():
+    mock_voice = _make_fake_voice()
+
+    with patch('src.synthesizer.PiperVoice') as mock_pv:
+        mock_pv.load.return_value = mock_voice
+        synthesize('First call')
+        synthesize('Second call')
+
+    mock_pv.load.assert_called_once()
