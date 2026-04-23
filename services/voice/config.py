@@ -10,3 +10,4 @@ PTT_KEY = os.getenv('PTT_KEY', 'space')
 WAKE_WORD_MODEL = os.getenv('WAKE_WORD_MODEL', 'alexa')
 _device = os.getenv('AUDIO_DEVICE')
 AUDIO_DEVICE = int(_device) if _device is not None else None
+PIPER_SPEAKER = int(os.getenv('PIPER_SPEAKER', '0'))
