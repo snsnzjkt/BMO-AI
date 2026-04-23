@@ -1,13 +1,30 @@
 import numpy as np
-from faster_whisper import WhisperModel
+import logging
 import config
 
 _model = None
+_whisper_import_error = None
+_logged_import_error = False
+
+try:
+    from faster_whisper import WhisperModel
+except Exception as exc:
+    WhisperModel = None
+    _whisper_import_error = exc
+
+
+log = logging.getLogger(__name__)
 
 
 def _load_model():
+    global _logged_import_error
     global _model
     if _model is None:
+        if WhisperModel is None:
+            if not _logged_import_error:
+                log.error('faster_whisper unavailable: %s', _whisper_import_error)
+                _logged_import_error = True
+            raise RuntimeError('Whisper model dependency is unavailable')
         _model = WhisperModel(config.WHISPER_MODEL, device='cpu', compute_type='int8')
     return _model
 

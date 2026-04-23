@@ -14,7 +14,7 @@ from src import wake_word, recorder, transcriber, brain_client, synthesizer, pla
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 log = logging.getLogger(__name__)
 
-FALLBACK_MESSAGE = "BMO's brain is sleeping... please try again later!"
+FALLBACK_MESSAGE = "Beemo's brain is sleeping... please try again later!"
 
 
 def _validate() -> None:
@@ -33,7 +33,7 @@ def _validate() -> None:
 
 def run_pipeline() -> None:
     _validate()
-    log.info('BMO is ready! Listening for wake word or press [%s]...', config.PTT_KEY)
+    log.info('Beemo is ready! Listening for wake word or press [%s]...', config.PTT_KEY)
 
     while True:
         try:
@@ -63,7 +63,7 @@ def run_pipeline() -> None:
             log.error('Brain service error: %s', e)
             response_text = FALLBACK_MESSAGE
 
-        log.info('BMO says: %s', response_text)
+        log.info('Beemo says: %s', response_text)
 
         try:
             audio_bytes = synthesizer.synthesize(response_text)

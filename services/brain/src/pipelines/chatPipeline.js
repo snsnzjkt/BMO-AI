@@ -7,7 +7,7 @@ const SYSTEM_PROMPT_PATH = path.resolve(
   '../../../../packages/prompts/systemPrompt.txt'
 );
 
-const FALLBACK_PROMPT = 'You are BMO, a cheerful and playful AI assistant.';
+const FALLBACK_PROMPT = 'You are Beemo, a cheerful and playful AI assistant.';
 
 function loadSystemPrompt() {
   try {

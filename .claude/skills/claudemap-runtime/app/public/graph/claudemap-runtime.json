@@ -1,0 +1,448 @@
+{
+  "meta": {
+    "repoName": "BMO-AI",
+    "branch": "master",
+    "creditLabel": "ClaudeMap skill",
+    "generatedAt": "2026-04-21T11:07:56.608Z",
+    "source": "claude"
+  },
+  "nodes": [
+    {
+      "id": "system-entrypoint",
+      "label": "Entrypoint",
+      "type": "system",
+      "icon": "server",
+      "parentId": null,
+      "filePath": "services/brain",
+      "lineCount": 34,
+      "health": "green",
+      "summary": "Express app bootstrap and route mounting"
+    },
+    {
+      "id": "system-routes",
+      "label": "Routes",
+      "type": "system",
+      "icon": "route",
+      "parentId": null,
+      "filePath": "services/brain/src/routes",
+      "lineCount": 52,
+      "health": "green",
+      "summary": "HTTP route handlers for chat, vision, RAG"
+    },
+    {
+      "id": "system-domain",
+      "label": "Domain",
+      "type": "system",
+      "icon": "layers",
+      "parentId": null,
+      "filePath": "services/brain/src",
+      "lineCount": 73,
+      "health": "green",
+      "summary": "Intent routing, pipelines, and LLM client"
+    },
+    {
+      "id": "system-services",
+      "label": "Services",
+      "type": "system",
+      "icon": "gear",
+      "parentId": "system-domain",
+      "filePath": "services/brain/src/services",
+      "lineCount": 47,
+      "health": "green",
+      "summary": "Intent classifier and Ollama LLM client"
+    },
+    {
+      "id": "system-pipelines",
+      "label": "Pipelines",
+      "type": "system",
+      "icon": "zap",
+      "parentId": "system-domain",
+      "filePath": "services/brain/src/pipelines",
+      "lineCount": 26,
+      "health": "green",
+      "summary": "Chat pipeline orchestration"
+    },
+    {
+      "id": "system-tests",
+      "label": "Tests",
+      "type": "system",
+      "icon": "file",
+      "parentId": null,
+      "filePath": "services/brain/src/__tests__",
+      "lineCount": 288,
+      "health": "green"
+    },
+    {
+      "id": "file-services-brain-index-js",
+      "label": "index.js",
+      "type": "file",
+      "icon": "server",
+      "parentId": "system-entrypoint",
+      "filePath": "services/brain/index.js",
+      "lineCount": 34,
+      "health": "green",
+      "summary": "App entry, mounts chat/vision/rag routes"
+    },
+    {
+      "id": "file-services-brain-src-routes-chat-js",
+      "label": "chat.js",
+      "type": "file",
+      "icon": "route",
+      "parentId": "system-routes",
+      "filePath": "services/brain/src/routes/chat.js",
+      "lineCount": 32,
+      "health": "green",
+      "summary": "POST /chat handler with intent routing"
+    },
+    {
+      "id": "file-services-brain-src-routes-rag-js",
+      "label": "rag.js",
+      "type": "file",
+      "icon": "route",
+      "parentId": "system-routes",
+      "filePath": "services/brain/src/routes/rag.js",
+      "lineCount": 10,
+      "health": "green"
+    },
+    {
+      "id": "file-services-brain-src-routes-vision-js",
+      "label": "vision.js",
+      "type": "file",
+      "icon": "route",
+      "parentId": "system-routes",
+      "filePath": "services/brain/src/routes/vision.js",
+      "lineCount": 10,
+      "health": "green"
+    },
+    {
+      "id": "file-services-brain-src-services-intentrouter-js",
+      "label": "intentRouter.js",
+      "type": "file",
+      "icon": "puzzle",
+      "parentId": "system-services",
+      "filePath": "services/brain/src/services/intentRouter.js",
+      "lineCount": 25,
+      "health": "green",
+      "summary": "Classifies user intent via Ollama"
+    },
+    {
+      "id": "file-services-brain-src-services-ollamaclient-js",
+      "label": "ollamaClient.js",
+      "type": "file",
+      "icon": "globe",
+      "parentId": "system-services",
+      "filePath": "services/brain/src/services/ollamaClient.js",
+      "lineCount": 22,
+      "health": "green",
+      "summary": "Ollama LLM HTTP client"
+    },
+    {
+      "id": "file-services-brain-src-pipelines-chatpipeline-js",
+      "label": "chatPipeline.js",
+      "type": "file",
+      "icon": "zap",
+      "parentId": "system-pipelines",
+      "filePath": "services/brain/src/pipelines/chatPipeline.js",
+      "lineCount": 26,
+      "health": "green",
+      "summary": "Runs chat pipeline with prompt assembly"
+    },
+    {
+      "id": "file-services-brain-src-tests-chat-test-js",
+      "label": "chat.test.js",
+      "type": "file",
+      "icon": "file",
+      "parentId": "system-tests",
+      "filePath": "services/brain/src/__tests__/chat.test.js",
+      "lineCount": 92,
+      "health": "green"
+    },
+    {
+      "id": "file-services-brain-src-tests-chatpipeline-test-js",
+      "label": "chatPipeline.test.js",
+      "type": "file",
+      "icon": "file",
+      "parentId": "system-tests",
+      "filePath": "services/brain/src/__tests__/chatPipeline.test.js",
+      "lineCount": 63,
+      "health": "green"
+    },
+    {
+      "id": "file-services-brain-src-tests-intentrouter-test-js",
+      "label": "intentRouter.test.js",
+      "type": "file",
+      "icon": "file",
+      "parentId": "system-tests",
+      "filePath": "services/brain/src/__tests__/intentRouter.test.js",
+      "lineCount": 42,
+      "health": "green"
+    },
+    {
+      "id": "file-services-brain-src-tests-ollamaclient-test-js",
+      "label": "ollamaClient.test.js",
+      "type": "file",
+      "icon": "file",
+      "parentId": "system-tests",
+      "filePath": "services/brain/src/__tests__/ollamaClient.test.js",
+      "lineCount": 67,
+      "health": "green"
+    },
+    {
+      "id": "file-services-brain-src-tests-stubs-test-js",
+      "label": "stubs.test.js",
+      "type": "file",
+      "icon": "file",
+      "parentId": "system-tests",
+      "filePath": "services/brain/src/__tests__/stubs.test.js",
+      "lineCount": 24,
+      "health": "green"
+    },
+    {
+      "id": "function-services-brain-src-routes-chat-js-router",
+      "label": "POST /chat",
+      "type": "function",
+      "icon": "code",
+      "parentId": "file-services-brain-src-routes-chat-js",
+      "filePath": "services/brain/src/routes/chat.js",
+      "lineCount": 20,
+      "health": "green",
+      "summary": "Handles chat requests, dispatches by intent"
+    },
+    {
+      "id": "function-services-brain-src-services-intentrouter-js-classifyIntent",
+      "label": "classifyIntent",
+      "type": "function",
+      "icon": "code",
+      "parentId": "file-services-brain-src-services-intentrouter-js",
+      "filePath": "services/brain/src/services/intentRouter.js",
+      "lineCount": 15,
+      "health": "green",
+      "summary": "LLM-based intent classification"
+    },
+    {
+      "id": "function-services-brain-src-pipelines-chatpipeline-js-runChatPipeline",
+      "label": "runChatPipeline",
+      "type": "function",
+      "icon": "code",
+      "parentId": "file-services-brain-src-pipelines-chatpipeline-js",
+      "filePath": "services/brain/src/pipelines/chatPipeline.js",
+      "lineCount": 18,
+      "health": "green",
+      "summary": "Assembles prompt and calls Ollama"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-system-entrypoint-system-routes",
+      "source": "system-entrypoint",
+      "target": "system-routes",
+      "type": "imports"
+    },
+    {
+      "id": "edge-system-routes-system-domain",
+      "source": "system-routes",
+      "target": "system-domain",
+      "type": "imports"
+    },
+    {
+      "id": "edge-system-tests-system-routes",
+      "source": "system-tests",
+      "target": "system-routes",
+      "type": "imports"
+    },
+    {
+      "id": "edge-system-tests-system-domain",
+      "source": "system-tests",
+      "target": "system-domain",
+      "type": "imports"
+    }
+  ],
+  "files": [
+    {
+      "path": "services/brain/index.js",
+      "relativePath": "services/brain/index.js",
+      "name": "index.js",
+      "directory": "services/brain",
+      "lineCount": 34,
+      "imports": [
+        "dotenv",
+        "express",
+        "./src/routes/chat",
+        "./src/routes/vision",
+        "./src/routes/rag"
+      ],
+      "exports": [
+        "app"
+      ],
+      "language": "javascript",
+      "mtimeMs": 1776767682230.0989
+    },
+    {
+      "path": "services/brain/src/__tests__/chat.test.js",
+      "relativePath": "services/brain/src/__tests__/chat.test.js",
+      "name": "chat.test.js",
+      "directory": "services/brain/src/__tests__",
+      "lineCount": 92,
+      "imports": [
+        "../services/intentRouter",
+        "../pipelines/chatPipeline",
+        "supertest",
+        "express",
+        "../routes/chat"
+      ],
+      "exports": [],
+      "language": "javascript",
+      "mtimeMs": 1776768070526.3264
+    },
+    {
+      "path": "services/brain/src/__tests__/chatPipeline.test.js",
+      "relativePath": "services/brain/src/__tests__/chatPipeline.test.js",
+      "name": "chatPipeline.test.js",
+      "directory": "services/brain/src/__tests__",
+      "lineCount": 63,
+      "imports": [
+        "../services/ollamaClient",
+        "fs",
+        "../pipelines/chatPipeline"
+      ],
+      "exports": [],
+      "language": "javascript",
+      "mtimeMs": 1776766384785.3481
+    },
+    {
+      "path": "services/brain/src/__tests__/intentRouter.test.js",
+      "relativePath": "services/brain/src/__tests__/intentRouter.test.js",
+      "name": "intentRouter.test.js",
+      "directory": "services/brain/src/__tests__",
+      "lineCount": 42,
+      "imports": [
+        "../services/ollamaClient",
+        "../services/intentRouter"
+      ],
+      "exports": [],
+      "language": "javascript",
+      "mtimeMs": 1776766137942.1636
+    },
+    {
+      "path": "services/brain/src/__tests__/ollamaClient.test.js",
+      "relativePath": "services/brain/src/__tests__/ollamaClient.test.js",
+      "name": "ollamaClient.test.js",
+      "directory": "services/brain/src/__tests__",
+      "lineCount": 67,
+      "imports": [
+        "../services/ollamaClient"
+      ],
+      "exports": [],
+      "language": "javascript",
+      "mtimeMs": 1776765841226.947
+    },
+    {
+      "path": "services/brain/src/__tests__/stubs.test.js",
+      "relativePath": "services/brain/src/__tests__/stubs.test.js",
+      "name": "stubs.test.js",
+      "directory": "services/brain/src/__tests__",
+      "lineCount": 24,
+      "imports": [
+        "supertest",
+        "express",
+        "../routes/vision",
+        "../routes/rag"
+      ],
+      "exports": [],
+      "language": "javascript",
+      "mtimeMs": 1776766995977.1047
+    },
+    {
+      "path": "services/brain/src/pipelines/chatPipeline.js",
+      "relativePath": "services/brain/src/pipelines/chatPipeline.js",
+      "name": "chatPipeline.js",
+      "directory": "services/brain/src/pipelines",
+      "lineCount": 26,
+      "imports": [
+        "path",
+        "fs",
+        "../services/ollamaClient"
+      ],
+      "exports": [
+        "runChatPipeline"
+      ],
+      "language": "javascript",
+      "mtimeMs": 1776766249430.9644
+    },
+    {
+      "path": "services/brain/src/routes/chat.js",
+      "relativePath": "services/brain/src/routes/chat.js",
+      "name": "chat.js",
+      "directory": "services/brain/src/routes",
+      "lineCount": 32,
+      "imports": [
+        "express",
+        "../services/intentRouter",
+        "../pipelines/chatPipeline"
+      ],
+      "exports": [
+        "router"
+      ],
+      "language": "javascript",
+      "mtimeMs": 1776768047657.0422
+    },
+    {
+      "path": "services/brain/src/routes/rag.js",
+      "relativePath": "services/brain/src/routes/rag.js",
+      "name": "rag.js",
+      "directory": "services/brain/src/routes",
+      "lineCount": 10,
+      "imports": [
+        "express"
+      ],
+      "exports": [
+        "router"
+      ],
+      "language": "javascript",
+      "mtimeMs": 1776767003702.9993
+    },
+    {
+      "path": "services/brain/src/routes/vision.js",
+      "relativePath": "services/brain/src/routes/vision.js",
+      "name": "vision.js",
+      "directory": "services/brain/src/routes",
+      "lineCount": 10,
+      "imports": [
+        "express"
+      ],
+      "exports": [
+        "router"
+      ],
+      "language": "javascript",
+      "mtimeMs": 1776766999444.6938
+    },
+    {
+      "path": "services/brain/src/services/intentRouter.js",
+      "relativePath": "services/brain/src/services/intentRouter.js",
+      "name": "intentRouter.js",
+      "directory": "services/brain/src/services",
+      "lineCount": 25,
+      "imports": [
+        "./ollamaClient"
+      ],
+      "exports": [
+        "classifyIntent"
+      ],
+      "language": "javascript",
+      "mtimeMs": 1776766131168.1448
+    },
+    {
+      "path": "services/brain/src/services/ollamaClient.js",
+      "relativePath": "services/brain/src/services/ollamaClient.js",
+      "name": "ollamaClient.js",
+      "directory": "services/brain/src/services",
+      "lineCount": 22,
+      "imports": [],
+      "exports": [
+        "generate"
+      ],
+      "language": "javascript",
+      "mtimeMs": 1776765842521.8774
+    }
+  ]
+}

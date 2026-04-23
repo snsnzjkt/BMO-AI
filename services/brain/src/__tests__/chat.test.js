@@ -26,40 +26,40 @@ describe('POST /chat', () => {
   it('returns 400 when text field is missing', async () => {
     const res = await request(app).post('/chat').send({});
     expect(res.status).toBe(400);
-    expect(res.body.error).toBe('BMO needs something to think about!');
+    expect(res.body.error).toBe('Beemo needs something to think about!');
   });
 
   it('returns 400 when text is an empty string', async () => {
     const res = await request(app).post('/chat').send({ text: '   ' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toBe('BMO needs something to think about!');
+    expect(res.body.error).toBe('Beemo needs something to think about!');
   });
 
   it('returns 400 when text is a non-string truthy value', async () => {
     const res = await request(app).post('/chat').send({ text: 42 });
     expect(res.status).toBe(400);
-    expect(res.body.error).toBe('BMO needs something to think about!');
+    expect(res.body.error).toBe('Beemo needs something to think about!');
   });
 
   it('returns text, intent, and model on success and calls pipelines with the original text', async () => {
     classifyIntent.mockResolvedValue('chat');
-    runChatPipeline.mockResolvedValue('Beep boop! I am BMO.');
+    runChatPipeline.mockResolvedValue('Beep boop! I am Beemo.');
 
-    const res = await request(app).post('/chat').send({ text: 'Hello BMO!' });
+    const res = await request(app).post('/chat').send({ text: 'Hello Beemo!' });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
-      text: 'Beep boop! I am BMO.',
+      text: 'Beep boop! I am Beemo.',
       intent: 'chat',
       model: 'gemma3',
     });
-    expect(classifyIntent).toHaveBeenCalledWith('Hello BMO!');
-    expect(runChatPipeline).toHaveBeenCalledWith('Hello BMO!');
+    expect(classifyIntent).toHaveBeenCalledWith('Hello Beemo!');
+    expect(runChatPipeline).toHaveBeenCalledWith('Hello Beemo!');
   });
 
   it('falls back to chat pipeline for unregistered intents', async () => {
     classifyIntent.mockResolvedValue('camera');
-    runChatPipeline.mockResolvedValue('BMO looks around...');
+    runChatPipeline.mockResolvedValue('Beemo looks around...');
 
     const res = await request(app).post('/chat').send({ text: 'take a picture' });
 
@@ -74,7 +74,7 @@ describe('POST /chat', () => {
     const res = await request(app).post('/chat').send({ text: 'Hello' });
 
     expect(res.status).toBe(503);
-    expect(res.body.error).toBe("BMO's brain is sleeping... try again!");
+    expect(res.body.error).toBe("Beemo's brain is sleeping... try again!");
     expect(consoleErrorSpy).toHaveBeenCalledWith('[chat route] pipeline error:', expect.any(Error));
   });
 
@@ -85,7 +85,7 @@ describe('POST /chat', () => {
     const res = await request(app).post('/chat').send({ text: 'Hello' });
 
     expect(res.status).toBe(503);
-    expect(res.body.error).toBe("BMO's brain is sleeping... try again!");
+    expect(res.body.error).toBe("Beemo's brain is sleeping... try again!");
     expect(consoleErrorSpy).toHaveBeenCalledWith('[chat route] pipeline error:', expect.any(Error));
   });
 });

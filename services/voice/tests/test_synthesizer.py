@@ -37,7 +37,7 @@ def test_synthesize_returns_wav_bytes():
 
     with patch('src.synthesizer.PiperVoice') as mock_pv:
         mock_pv.load.return_value = mock_voice
-        result = synthesize('Hello BMO!')
+        result = synthesize('Hello Beemo!')
 
     assert isinstance(result, bytes)
     assert len(result) > 44  # more than just a WAV header

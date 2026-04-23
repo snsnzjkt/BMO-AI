@@ -26,7 +26,7 @@ app.use('/rag', ragRoute);
 
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`BMO Brain service running on port ${PORT} 🎮`);
+    console.log(`Beemo Brain service running on port ${PORT} 🎮`);
   });
 }
 

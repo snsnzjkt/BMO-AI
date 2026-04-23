@@ -17,7 +17,7 @@ describe('chatPipeline.runChatPipeline', () => {
   });
 
   it('returns Gemma response using the system prompt from file', async () => {
-    readFileSyncSpy.mockReturnValue('You are BMO!');
+    readFileSyncSpy.mockReturnValue('You are Beemo!');
     generate.mockResolvedValue('Beep boop, hello friend!');
 
     const result = await runChatPipeline('Hello!');
@@ -26,17 +26,17 @@ describe('chatPipeline.runChatPipeline', () => {
     expect(generate).toHaveBeenCalledWith(
       expect.any(String),
       'Hello!',
-      'You are BMO!'
+      'You are Beemo!'
     );
   });
 
   it('trims whitespace from the system prompt file content', async () => {
-    readFileSyncSpy.mockReturnValue('   You are BMO!   \n');
+    readFileSyncSpy.mockReturnValue('   You are Beemo!   \n');
     generate.mockResolvedValue('Hi!');
 
     await runChatPipeline('Hey');
 
-    expect(generate).toHaveBeenCalledWith(expect.any(String), 'Hey', 'You are BMO!');
+    expect(generate).toHaveBeenCalledWith(expect.any(String), 'Hey', 'You are Beemo!');
   });
 
   it('falls back to a default prompt when the system prompt file is unreadable', async () => {
@@ -49,12 +49,12 @@ describe('chatPipeline.runChatPipeline', () => {
     expect(generate).toHaveBeenCalledWith(
       expect.any(String),
       'Hello!',
-      'You are BMO, a cheerful and playful AI assistant.'
+      'You are Beemo, a cheerful and playful AI assistant.'
     );
   });
 
   it('propagates errors from generate without catching them', async () => {
-    readFileSyncSpy.mockReturnValue('You are BMO!');
+    readFileSyncSpy.mockReturnValue('You are Beemo!');
     generate.mockRejectedValue(new Error('ECONNREFUSED'));
 
     await expect(runChatPipeline('Hello!')).rejects.toThrow('ECONNREFUSED');

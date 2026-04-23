@@ -33,7 +33,7 @@ def test_pipeline_runs_full_happy_path(mocker):
     """Wake word fires → record → transcribe → chat → synthesize → play → loop back."""
     mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
     mocker.patch('src.recorder.record', return_value=np.zeros(16000, dtype=np.float32))
-    mocker.patch('src.transcriber.transcribe', return_value='Hello BMO!')
+    mocker.patch('src.transcriber.transcribe', return_value='Hello Beemo!')
     mock_chat = mocker.patch('src.brain_client.chat', return_value='Hi there friend!')
     mock_synthesize = mocker.patch('src.synthesizer.synthesize', return_value=b'\x00\x01')
     mock_play = mocker.patch('src.player.play')
@@ -42,7 +42,7 @@ def test_pipeline_runs_full_happy_path(mocker):
     with pytest.raises(KeyboardInterrupt):
         main.run_pipeline()
 
-    mock_chat.assert_called_once_with('Hello BMO!')
+    mock_chat.assert_called_once_with('Hello Beemo!')
     mock_synthesize.assert_called_once_with('Hi there friend!')
     mock_play.assert_called_once_with(b'\x00\x01')
 

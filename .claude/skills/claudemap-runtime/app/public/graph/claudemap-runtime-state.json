@@ -1,0 +1,28 @@
+{
+  "graphRevision": 1,
+  "updatedAt": "2026-04-21T11:07:56.633Z",
+  "graphMeta": {
+    "repoName": "BMO-AI",
+    "generatedAt": "2026-04-21T11:07:56.608Z",
+    "source": "claude",
+    "nodeCount": 21,
+    "edgeCount": 4,
+    "fileCount": 12
+  },
+  "runtime": {
+    "healthOverlay": false,
+    "highlightedNodeIds": [],
+    "highlightColor": "accent",
+    "focus": null,
+    "guidedFlow": null,
+    "presentation": {
+      "mode": "free",
+      "lockInput": false,
+      "title": null,
+      "explanation": null,
+      "body": null,
+      "stepLabel": null,
+      "updatedAt": null
+    }
+  }
+}

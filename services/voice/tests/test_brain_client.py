@@ -12,13 +12,13 @@ def set_brain_url(monkeypatch):
 
 def test_chat_returns_text_on_success():
     mock_response = MagicMock()
-    mock_response.json.return_value = {'text': 'Hello from BMO!'}
+    mock_response.json.return_value = {'text': 'Hello from Beemo!'}
     mock_response.raise_for_status.return_value = None
 
     with patch('src.brain_client.httpx.post', return_value=mock_response) as mock_post:
         result = chat('Hello!')
 
-    assert result == 'Hello from BMO!'
+    assert result == 'Hello from Beemo!'
     mock_post.assert_called_once_with(
         'http://localhost:3001/chat',
         json={'text': 'Hello!'},

@@ -20,12 +20,12 @@ def _make_mock_model(text):
 
 
 def test_transcribe_returns_stripped_text():
-    mock_model = _make_mock_model('  Hello BMO!  ')
+    mock_model = _make_mock_model('  Hello Beemo!  ')
 
     with patch('src.transcriber.WhisperModel', return_value=mock_model):
         result = transcriber_module.transcribe(np.zeros(16000, dtype=np.float32))
 
-    assert result == 'Hello BMO!'
+    assert result == 'Hello Beemo!'
     _, kwargs = mock_model.transcribe.call_args
     assert kwargs.get('beam_size') == 5
 

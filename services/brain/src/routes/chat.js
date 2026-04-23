@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
   const { text } = req.body ?? {};
 
   if (!text || typeof text !== 'string' || text.trim() === '') {
-    return res.status(400).json({ error: 'BMO needs something to think about!' });
+    return res.status(400).json({ error: 'Beemo needs something to think about!' });
   }
 
   try {
@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
     res.json({ text: responseText, intent, model: process.env.LLM_MODEL || 'gemma3' });
   } catch (err) {
     console.error('[chat route] pipeline error:', err);
-    res.status(503).json({ error: "BMO's brain is sleeping... try again!" });
+    res.status(503).json({ error: "Beemo's brain is sleeping... try again!" });
   }
 });
 

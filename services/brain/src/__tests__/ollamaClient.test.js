@@ -13,12 +13,12 @@ describe('ollamaClient.generate', () => {
   it('sends a POST request to Ollama and returns response text', async () => {
     global.fetch.mockResolvedValue({
       ok: true,
-      json: async () => ({ response: 'Hello from BMO!' }),
+      json: async () => ({ response: 'Hello from Beemo!' }),
     });
 
-    const result = await generate('gemma3', 'say hello', 'you are BMO');
+    const result = await generate('gemma3', 'say hello', 'you are Beemo');
 
-    expect(result).toBe('Hello from BMO!');
+    expect(result).toBe('Hello from Beemo!');
     expect(global.fetch).toHaveBeenCalledWith(
       'http://localhost:11434/api/generate',
       expect.objectContaining({
@@ -27,7 +27,7 @@ describe('ollamaClient.generate', () => {
         body: JSON.stringify({
           model: 'gemma3',
           prompt: 'say hello',
-          system: 'you are BMO',
+          system: 'you are Beemo',
           stream: false,
         }),
       })
