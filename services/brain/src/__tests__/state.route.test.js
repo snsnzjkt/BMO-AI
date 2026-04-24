@@ -41,6 +41,7 @@ describe('state route', () => {
           expect(res.headers['content-type']).toMatch('text/event-stream');
           expect(res.headers['cache-control']).toBe('no-cache');
           expect(res.headers['connection']).toBe('keep-alive');
+          expect(res.headers['access-control-allow-origin']).toBe('*');
           res.on('data', (chunk) => {
             data += chunk.toString();
             if (data.includes('\n\n')) {
