@@ -114,6 +114,12 @@ describe('POST /chat/stream', () => {
     expect(res.body.error).toBe('Beemo needs something to think about!');
   });
 
+  it('returns 400 when text is a non-string value', async () => {
+    const res = await request(app).post('/chat/stream').send({ text: 42 });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Beemo needs something to think about!');
+  });
+
   it('streams sentences as NDJSON and ends with done:true', async () => {
     streamChatPipeline.mockImplementation(async function* () {
       yield 'Hello!';
