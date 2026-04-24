@@ -30,7 +30,7 @@ async function chat(model, messages) {
   }
 
   const data = await response.json();
-  if (!data.message?.content) {
+  if (data.message?.content === undefined) {
     throw new Error('Ollama response missing "message.content" field');
   }
   return data.message.content;
