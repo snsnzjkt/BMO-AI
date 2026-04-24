@@ -118,6 +118,14 @@ describe('ollamaClient.chat', () => {
     await expect(chat('gemma3', [])).rejects.toThrow('missing "message.content"');
   });
 
+  it('throws when response has an empty content string', async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: { content: '' } }),
+    });
+    await expect(chat('gemma3', [])).rejects.toThrow('missing "message.content"');
+  });
+
   it('throws when fetch rejects (Ollama unreachable)', async () => {
     global.fetch.mockRejectedValue(new Error('ECONNREFUSED'));
     await expect(chat('gemma3', [])).rejects.toThrow('ECONNREFUSED');
