@@ -32,10 +32,9 @@ def test_set_state_silently_ignores_connect_error():
 def test_set_state_silently_ignores_http_error():
     mock_response = MagicMock()
     mock_response.status_code = 503
-    with patch('src.state_client.httpx.post') as mock_post:
-        mock_post.return_value.raise_for_status.side_effect = httpx.HTTPStatusError(
-            '503', request=MagicMock(), response=mock_response
-        )
+    with patch('src.state_client.httpx.post', side_effect=httpx.HTTPStatusError(
+        '503', request=MagicMock(), response=mock_response
+    )):
         set_state('thinking')  # must not raise
 
 
