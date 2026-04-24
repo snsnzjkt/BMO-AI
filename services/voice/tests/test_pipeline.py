@@ -189,3 +189,22 @@ def test_pipeline_emits_silent_state_when_transcription_empty(mocker, mock_set_s
 
     states = [call.args[0] for call in mock_set_state.call_args_list]
     assert 'silent' in states
+
+
+def test_pipeline_emits_error_state_when_wake_word_listener_fails(mocker, mock_set_state):
+    call_count = {'n': 0}
+
+    def mock_listen():
+        call_count['n'] += 1
+        if call_count['n'] == 1:
+            raise RuntimeError('Listen timeout')
+        raise KeyboardInterrupt
+
+    mocker.patch('src.wake_word.listen', side_effect=mock_listen)
+    mocker.patch('main._validate')
+
+    with pytest.raises(KeyboardInterrupt):
+        main.run_pipeline()
+
+    states = [call.args[0] for call in mock_set_state.call_args_list]
+    assert 'error' in states
