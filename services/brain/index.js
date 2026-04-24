@@ -4,6 +4,7 @@ const express = require('express');
 const chatRoute = require('./src/routes/chat');
 const visionRoute = require('./src/routes/vision');
 const ragRoute = require('./src/routes/rag');
+const stateRoute = require('./src/routes/state');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,6 +24,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', service: 'brain' }));
 app.use('/chat', chatRoute);
 app.use('/vision', visionRoute);
 app.use('/rag', ragRoute);
+app.use('/state', stateRoute);
 
 if (require.main === module) {
   app.listen(PORT, () => {
