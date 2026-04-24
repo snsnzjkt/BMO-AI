@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { generate } = require('../services/ollamaClient');
+const { chat } = require('../services/ollamaClient');
 
 const SYSTEM_PROMPT_PATH = path.resolve(
   __dirname,
@@ -8,6 +8,9 @@ const SYSTEM_PROMPT_PATH = path.resolve(
 );
 
 const FALLBACK_PROMPT = 'You are Beemo, a cheerful and playful AI assistant.';
+const MAX_HISTORY = 20;
+
+let messages = [];
 
 function loadSystemPrompt() {
   try {
@@ -19,7 +22,18 @@ function loadSystemPrompt() {
 
 async function runChatPipeline(text) {
   const system = loadSystemPrompt();
-  return generate(process.env.LLM_MODEL || 'gemma3', text, system);
+  const candidate = [...messages, { role: 'user', content: text }];
+  const trimmed = candidate.length > MAX_HISTORY ? candidate.slice(-MAX_HISTORY) : candidate;
+  const fullMessages = [{ role: 'system', content: system }, ...trimmed];
+
+  const response = await chat(process.env.LLM_MODEL || 'gemma3', fullMessages);
+
+  messages = [...trimmed, { role: 'assistant', content: response }];
+  return response;
 }
 
-module.exports = { runChatPipeline };
+function _resetHistory() {
+  messages = [];
+}
+
+module.exports = { runChatPipeline, _resetHistory };
