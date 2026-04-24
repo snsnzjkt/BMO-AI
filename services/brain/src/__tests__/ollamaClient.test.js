@@ -1,4 +1,4 @@
-const { generate } = require('../services/ollamaClient');
+const { generate, chat } = require('../services/ollamaClient');
 
 describe('ollamaClient.generate', () => {
   beforeEach(() => {
@@ -63,5 +63,63 @@ describe('ollamaClient.generate', () => {
     global.fetch.mockRejectedValue(new Error('ECONNREFUSED'));
 
     await expect(generate('gemma3', 'hello')).rejects.toThrow('ECONNREFUSED');
+  });
+});
+
+describe('ollamaClient.chat', () => {
+  beforeEach(() => {
+    global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    delete global.fetch;
+  });
+
+  it('sends messages to /api/chat and returns message content', async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: { content: 'Hello from Beemo!' } }),
+    });
+
+    const messages = [
+      { role: 'system', content: 'You are Beemo.' },
+      { role: 'user', content: 'hello' },
+    ];
+
+    const result = await chat('gemma3', messages);
+
+    expect(result).toBe('Hello from Beemo!');
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:11434/api/chat',
+      expect.objectContaining({
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'gemma3',
+          messages,
+          stream: false,
+          options: { num_predict: 80, temperature: 0.7 },
+        }),
+      })
+    );
+  });
+
+  it('throws when Ollama returns a non-ok status', async () => {
+    global.fetch.mockResolvedValue({ ok: false, status: 503 });
+    await expect(chat('gemma3', [])).rejects.toThrow('Ollama request failed: 503');
+  });
+
+  it('throws when response is missing message.content', async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: {} }),
+    });
+    await expect(chat('gemma3', [])).rejects.toThrow('missing "message.content"');
+  });
+
+  it('throws when fetch rejects (Ollama unreachable)', async () => {
+    global.fetch.mockRejectedValue(new Error('ECONNREFUSED'));
+    await expect(chat('gemma3', [])).rejects.toThrow('ECONNREFUSED');
   });
 });
