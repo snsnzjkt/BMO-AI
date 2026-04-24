@@ -1,0 +1,5 @@
+{
+  "python.terminal.use.envfile": true,
+  "python.terminal.activateEnvironment": true,
+  "python.envFile": "${workspaceFolder}/services/voice/.env"
+}

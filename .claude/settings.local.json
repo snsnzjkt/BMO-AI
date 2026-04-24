@@ -41,7 +41,9 @@
       "Bash(pip show *)",
       "Bash(python -c \"import piper; print\\('piper-tts in venv:', piper.__file__\\)\")",
       "Read(//c/Users/Kate/Downloads/**)",
-      "Bash(python *)"
+      "Bash(python *)",
+      "WebFetch(domain:www.figma.com)",
+      "PowerShell(Get-Content *)"
     ]
   }
 }
