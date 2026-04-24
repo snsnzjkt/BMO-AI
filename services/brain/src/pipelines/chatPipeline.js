@@ -20,11 +20,12 @@ function loadSystemPrompt() {
   }
 }
 
+const SYSTEM_PROMPT = loadSystemPrompt();
+
 async function runChatPipeline(text) {
-  const system = loadSystemPrompt();
   const candidate = [...messages, { role: 'user', content: text }];
   const trimmed = candidate.length > MAX_HISTORY ? candidate.slice(-MAX_HISTORY) : candidate;
-  const fullMessages = [{ role: 'system', content: system }, ...trimmed];
+  const fullMessages = [{ role: 'system', content: SYSTEM_PROMPT }, ...trimmed];
 
   const response = await chat(process.env.LLM_MODEL || 'gemma3', fullMessages);
 

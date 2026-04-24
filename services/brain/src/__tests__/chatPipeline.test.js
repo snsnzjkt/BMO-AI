@@ -1,24 +1,24 @@
 jest.mock('../services/ollamaClient');
 
-const { chat } = require('../services/ollamaClient');
 const fs = require('fs');
-const chatPipeline = require('../pipelines/chatPipeline');
 
 describe('chatPipeline.runChatPipeline', () => {
-  let readFileSyncSpy;
+  let chat, chatPipeline, readFileSyncSpy;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
-    chatPipeline._resetHistory();
+    jest.resetModules();
+    jest.mock('../services/ollamaClient');
+    readFileSyncSpy = jest.spyOn(fs, 'readFileSync').mockReturnValue('You are Beemo!');
+    chatPipeline = require('../pipelines/chatPipeline');
+    ({ chat } = require('../services/ollamaClient'));
   });
 
   afterEach(() => {
     readFileSyncSpy.mockRestore();
+    jest.resetAllMocks();
   });
 
   it('returns Ollama response using the system prompt from file', async () => {
-    readFileSyncSpy.mockReturnValue('You are Beemo!');
     chat.mockResolvedValue('Beep boop, hello friend!');
 
     const result = await chatPipeline.runChatPipeline('Hello!');
@@ -34,9 +34,13 @@ describe('chatPipeline.runChatPipeline', () => {
   });
 
   it('trims whitespace from the system prompt file content', async () => {
+    jest.resetModules();
+    jest.mock('../services/ollamaClient');
     readFileSyncSpy.mockReturnValue('   You are Beemo!   \n');
-    chat.mockResolvedValue('Hi!');
+    chatPipeline = require('../pipelines/chatPipeline');
+    ({ chat } = require('../services/ollamaClient'));
 
+    chat.mockResolvedValue('Hi!');
     await chatPipeline.runChatPipeline('Hey');
 
     expect(chat).toHaveBeenCalledWith(
@@ -46,9 +50,13 @@ describe('chatPipeline.runChatPipeline', () => {
   });
 
   it('falls back to a default prompt when the system prompt file is unreadable', async () => {
+    jest.resetModules();
+    jest.mock('../services/ollamaClient');
     readFileSyncSpy.mockImplementation(() => { throw new Error('ENOENT'); });
-    chat.mockResolvedValue('Hi there!');
+    chatPipeline = require('../pipelines/chatPipeline');
+    ({ chat } = require('../services/ollamaClient'));
 
+    chat.mockResolvedValue('Hi there!');
     const result = await chatPipeline.runChatPipeline('Hello!');
 
     expect(result).toBe('Hi there!');
@@ -61,14 +69,11 @@ describe('chatPipeline.runChatPipeline', () => {
   });
 
   it('propagates errors from chat without catching them', async () => {
-    readFileSyncSpy.mockReturnValue('You are Beemo!');
     chat.mockRejectedValue(new Error('ECONNREFUSED'));
-
     await expect(chatPipeline.runChatPipeline('Hello!')).rejects.toThrow('ECONNREFUSED');
   });
 
   it('accumulates conversation history across calls', async () => {
-    readFileSyncSpy.mockReturnValue('You are Beemo!');
     chat.mockResolvedValueOnce('Hi there!').mockResolvedValueOnce('Good, thanks!');
 
     await chatPipeline.runChatPipeline('Hello!');
@@ -86,7 +91,6 @@ describe('chatPipeline.runChatPipeline', () => {
   });
 
   it('caps history at 20 messages by dropping the oldest when over limit', async () => {
-    readFileSyncSpy.mockReturnValue('You are Beemo!');
     chat.mockResolvedValue('ok');
 
     for (let i = 0; i < 10; i++) {
@@ -96,14 +100,13 @@ describe('chatPipeline.runChatPipeline', () => {
     await chatPipeline.runChatPipeline('message 10');
 
     const calledMessages = chat.mock.calls[chat.mock.calls.length - 1][1];
-    expect(calledMessages.length).toBe(21); // system + 20 history entries
+    expect(calledMessages.length).toBe(21);
     expect(calledMessages[0].role).toBe('system');
     expect(calledMessages.find(m => m.role === 'user' && m.content === 'message 0')).toBeUndefined();
     expect(calledMessages[calledMessages.length - 1]).toEqual({ role: 'user', content: 'message 10' });
   });
 
   it('does not store history when chat throws', async () => {
-    readFileSyncSpy.mockReturnValue('You are Beemo!');
     chat.mockRejectedValueOnce(new Error('network error'));
     chat.mockResolvedValueOnce('success');
 
@@ -120,7 +123,6 @@ describe('chatPipeline.runChatPipeline', () => {
   });
 
   it('_resetHistory clears stored conversation', async () => {
-    readFileSyncSpy.mockReturnValue('You are Beemo!');
     chat.mockResolvedValue('hi');
 
     await chatPipeline.runChatPipeline('hello');
