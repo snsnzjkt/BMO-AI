@@ -2,7 +2,7 @@ jest.mock('../services/intentRouter');
 jest.mock('../pipelines/chatPipeline');
 
 const { classifyIntent } = require('../services/intentRouter');
-const { runChatPipeline } = require('../pipelines/chatPipeline');
+const { runChatPipeline, streamChatPipeline } = require('../pipelines/chatPipeline');
 const request = require('supertest');
 const express = require('express');
 const chatRoute = require('../routes/chat');
@@ -87,5 +87,69 @@ describe('POST /chat', () => {
     expect(res.status).toBe(503);
     expect(res.body.error).toBe("Beemo's brain is sleeping... try again!");
     expect(consoleErrorSpy).toHaveBeenCalledWith('[chat route] pipeline error:', expect.any(Error));
+  });
+});
+
+describe('POST /chat/stream', () => {
+  let consoleErrorSpy;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    jest.resetAllMocks();
+  });
+
+  it('returns 400 when text field is missing', async () => {
+    const res = await request(app).post('/chat/stream').send({});
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Beemo needs something to think about!');
+  });
+
+  it('returns 400 when text is empty string', async () => {
+    const res = await request(app).post('/chat/stream').send({ text: '   ' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Beemo needs something to think about!');
+  });
+
+  it('streams sentences as NDJSON and ends with done:true', async () => {
+    streamChatPipeline.mockImplementation(async function* () {
+      yield 'Hello!';
+      yield 'How are you?';
+    });
+
+    const res = await request(app)
+      .post('/chat/stream')
+      .send({ text: 'Hi there' })
+      .buffer(true)
+      .parse((res, fn) => {
+        let data = '';
+        res.on('data', chunk => { data += chunk.toString(); });
+        res.on('end', () => fn(null, data));
+      });
+
+    const lines = res.body.split('\n').filter(Boolean).map(JSON.parse);
+    expect(lines).toEqual([
+      { sentence: 'Hello!' },
+      { sentence: 'How are you?' },
+      { done: true },
+    ]);
+  });
+
+  it('returns 503 JSON when streamChatPipeline throws before first write', async () => {
+    streamChatPipeline.mockImplementation(async function* () {
+      throw new Error('Ollama down');
+      yield; // make it an async generator
+    });
+
+    const res = await request(app)
+      .post('/chat/stream')
+      .send({ text: 'Hi' });
+
+    expect(res.status).toBe(503);
+    expect(res.body.error).toBe("Beemo's brain is sleeping... try again!");
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[chat/stream] pipeline error:', expect.any(Error));
   });
 });
