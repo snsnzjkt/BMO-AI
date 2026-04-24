@@ -1,0 +1,232 @@
+.body,
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #000;
+  position: relative;
+  overflow: auto;
+}
+
+body.is-monochrome {
+  filter: grayscale(1);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("./Adventure Time.jpg") center center / cover no-repeat;
+  filter: blur(2px);
+  transform: scale(1.08);
+  z-index: 0;
+}
+
+.container {
+  height: 16.875rem;
+  width: 12.5rem;
+  background-color: #43a899;
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border: black solid 0.2rem;
+  border-radius: 0.4rem;
+  transform: scale(2.5);
+  transform-origin: center;
+  z-index: 1;
+}
+
+.container.is-monochrome {
+  filter: grayscale(1);
+}
+
+.face {
+  height: 6.25rem;
+  width: 9.375rem;
+  margin-left: 1.5rem;
+  margin-top: 1rem;
+  border: black solid 1px;
+  border-radius: 0.4rem;
+  background-color: #8fecbf;
+  overflow: hidden;
+}
+
+#face-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fill;
+}
+
+.CD {
+  height: 0.625rem;
+  width: 5.625rem;
+  background-color: #072821;
+  margin-top: 1rem;
+  margin-left: 1.4rem;
+}
+
+.blue-btn {
+  height: 0.6875rem;
+  width: 0.6875rem;
+  background-color: #00009c;
+  border: black solid 1px;
+  border-radius: 5rem;
+  margin-top: -0.7rem;
+  margin-left: 10rem;
+}
+
+.power-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.power-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.power-icon {
+  width: 0.22rem;
+  height: 0.22rem;
+  border: 0.8px solid #fff;
+  border-radius: 50%;
+  position: relative;
+}
+
+.power-icon::before {
+  content: "";
+  position: absolute;
+  width: 0.075rem;
+  height: 0.18rem;
+  background: #fff;
+  top: -0.11rem;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+}
+
+.yellow-btn {
+  background-color: #fdd050;
+  height: 3.75rem;
+  position: relative;
+  width: 1.25rem;
+  left: 3.8rem;
+  top: 1rem;
+  border: black solid 1px;
+}
+
+.yellow-btn2 {
+  height: 1.25rem;
+  width: 1.3125rem;
+  background-color: #fdd050;
+  position: absolute;
+  left: 1.2rem;
+  bottom: 1.3rem;
+  border-top: black solid 1px;
+  border-right: black solid 1px;
+  border-bottom: black solid 1px;
+  border-left: #fdd050 solid 1px;
+}
+
+.yellow-btn2::after {
+  content: "";
+  height: 1.25rem;
+  background-color: #fdd050;
+  position: relative;
+  display: block;
+  left: -2.5rem;
+  border-top: black solid 1px;
+  border-left: black solid 1px;
+  border-bottom: black solid 1px;
+  border-right: #fdd050 solid 1px;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 13px solid transparent;
+  border-right: 13px solid transparent;
+  border-bottom: 23px solid #48c2cf;
+  top: -1.7rem;
+  left: 8rem;
+  position: relative;
+}
+
+.outline {
+  border-bottom: solid black 1px;
+  width: 1.5625rem;
+  position: absolute;
+  top: 1.4rem;
+  left: -0.8rem;
+}
+
+.outline2 {
+  border-bottom: solid black 1px;
+  width: 1.625rem;
+  position: absolute;
+  top: 0.7rem;
+  left: -1.2rem;
+  transform: rotate(120deg);
+}
+
+.outline3 {
+  border-bottom: solid black 1px;
+  width: 1.625rem;
+  position: absolute;
+  top: 0.7rem;
+  left: -0.4rem;
+  transform: rotate(61deg);
+}
+
+.green-btn {
+  height: 0.75rem;
+  width: 0.75rem;
+  background-color: #4dc07b;
+  border: black solid 1px;
+  border-radius: 5rem;
+  top: 12rem;
+  left: 10.3rem;
+  position: absolute;
+}
+
+.red-btn {
+  height: 1.5625rem;
+  width: 1.5625rem;
+  background-color: #e70e16;
+  border: black solid 1px;
+  border-radius: 5rem;
+  top: -1.6rem;
+  left: 8.9rem;
+  position: relative;
+}
+
+.blue-line {
+  height: 0.25rem;
+  width: 1.625rem;
+  background-color: #00009c;
+  border: black solid 1px;
+  border-radius: 5rem;
+  left: 2.5rem;
+  bottom: -0.8rem;
+  position: relative;
+}
+
+.blue-line::after {
+  content: "";
+  height: 0.25rem;
+  width: 1.625rem;
+  background-color: #00009c;
+  border: black solid 1px;
+  border-radius: 5rem;
+  left: 2.5rem;
+  bottom: -0.1rem;
+  position: absolute;
+}
