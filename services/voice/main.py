@@ -67,21 +67,26 @@ def run_pipeline() -> None:
 
         state_client.set_state('thinking')
         try:
-            response_text = brain_client.chat(text)
-            speak_state = 'speaking'
+            first = True
+            for sentence in brain_client.stream_chat(text):
+                if first:
+                    state_client.set_state('speaking')
+                    first = False
+                log.info('Beemo says: %s', sentence)
+                try:
+                    audio_bytes = synthesizer.synthesize(sentence)
+                    player.play(audio_bytes)
+                except synthesizer.SynthesisError as e:
+                    log.error('Synthesis error for sentence: %s', e)
         except brain_client.BrainServiceError as e:
             log.error('Brain service error: %s', e)
-            speak_state = 'fallback'
-            response_text = FALLBACK_MESSAGE
-
-        log.info('Beemo says: %s', response_text)
-
-        state_client.set_state(speak_state)
-        try:
-            audio_bytes = synthesizer.synthesize(response_text)
-            player.play(audio_bytes)
-        except synthesizer.SynthesisError as e:
-            log.error('Synthesis error: %s', e)
+            state_client.set_state('fallback')
+            log.info('Beemo says: %s', FALLBACK_MESSAGE)
+            try:
+                audio_bytes = synthesizer.synthesize(FALLBACK_MESSAGE)
+                player.play(audio_bytes)
+            except synthesizer.SynthesisError as e:
+                log.error('Synthesis error: %s', e)
 
         log.info('Listening for wake word or press [%s]...', config.PTT_KEY)
 
