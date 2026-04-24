@@ -7,10 +7,6 @@ body {
   overflow: auto;
 }
 
-body.is-monochrome {
-  filter: grayscale(1);
-}
-
 body::before {
   content: "";
   position: fixed;
