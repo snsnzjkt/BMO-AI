@@ -76,6 +76,9 @@
           const { state } = JSON.parse(event.data);
           setFace(state);
         };
+        es.onerror = () => {
+          if (!isPoweredOff) setFace('off');
+        };
       }
 
       powerButton.addEventListener('click', () => {

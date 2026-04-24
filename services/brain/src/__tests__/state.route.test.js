@@ -30,6 +30,11 @@ describe('state route', () => {
       const res = await request(app).post('/state').send({ state: 42 });
       expect(res.status).toBe(400);
     });
+
+    it('returns 400 when state is not a known key', async () => {
+      const res = await request(app).post('/state').send({ state: 'bogus' });
+      expect(res.status).toBe(400);
+    });
   });
 
   describe('GET /state/stream', () => {
