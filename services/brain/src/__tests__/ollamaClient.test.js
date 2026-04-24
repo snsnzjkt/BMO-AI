@@ -29,6 +29,7 @@ describe('ollamaClient.generate', () => {
           prompt: 'say hello',
           system: 'you are Beemo',
           stream: false,
+          options: { num_predict: 80, temperature: 0.7 },
         }),
       })
     );
@@ -45,7 +46,7 @@ describe('ollamaClient.generate', () => {
     expect(global.fetch).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
-        body: JSON.stringify({ model: 'gemma3', prompt: 'hello', system: '', stream: false }),
+        body: JSON.stringify({ model: 'gemma3', prompt: 'hello', system: '', stream: false, options: { num_predict: 80, temperature: 0.7 } }),
       })
     );
   });

@@ -4,7 +4,7 @@ async function generate(model, prompt, system = '') {
   const response = await fetch(`${BASE_URL}/api/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, prompt, system, stream: false }),
+    body: JSON.stringify({ model, prompt, system, stream: false, options: { num_predict: 80, temperature: 0.7 } }),
   });
 
   if (!response.ok) {
