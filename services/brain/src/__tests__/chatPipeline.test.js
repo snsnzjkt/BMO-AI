@@ -140,3 +140,100 @@ describe('chatPipeline.runChatPipeline', () => {
     );
   });
 });
+
+describe('chatPipeline.streamChatPipeline', () => {
+  let chatStream, streamChatPipeline, chatPipelineModule, readFileSyncSpy;
+
+  beforeEach(() => {
+    jest.resetModules();
+    jest.mock('../services/ollamaClient');
+    readFileSyncSpy = jest.spyOn(require('fs'), 'readFileSync').mockReturnValue('You are Beemo!');
+    chatPipelineModule = require('../pipelines/chatPipeline');
+    streamChatPipeline = chatPipelineModule.streamChatPipeline;
+    ({ chatStream } = require('../services/ollamaClient'));
+    chatPipelineModule._resetHistory();
+  });
+
+  afterEach(() => {
+    readFileSyncSpy.mockRestore();
+  });
+
+  it('yields sentences split on punctuation boundaries', async () => {
+    chatStream.mockImplementation(async function* () {
+      yield 'Hello ';
+      yield 'world! ';
+      yield 'How are you?';
+    });
+
+    const sentences = [];
+    for await (const s of streamChatPipeline('hi')) {
+      sentences.push(s);
+    }
+
+    expect(sentences).toEqual(['Hello world!', 'How are you?']);
+  });
+
+  it('yields trailing text without punctuation at end of stream', async () => {
+    chatStream.mockImplementation(async function* () {
+      yield 'Hello';
+      yield ' world';
+    });
+
+    const sentences = [];
+    for await (const s of streamChatPipeline('hi')) {
+      sentences.push(s);
+    }
+
+    expect(sentences).toEqual(['Hello world']);
+  });
+
+  it('updates conversation history with full response after generator exhausted', async () => {
+    chatStream
+      .mockImplementationOnce(async function* () {
+        yield 'Hello! ';
+        yield 'How are you?';
+      })
+      .mockImplementationOnce(async function* () {
+        yield 'Great!';
+      });
+
+    for await (const _ of streamChatPipeline('hi')) { /* exhaust */ }
+    for await (const _ of streamChatPipeline('thanks')) { /* exhaust */ }
+
+    const secondCallMessages = chatStream.mock.calls[1][1];
+    expect(secondCallMessages).toContainEqual({ role: 'user', content: 'hi' });
+    expect(secondCallMessages).toContainEqual({ role: 'assistant', content: 'Hello! How are you?' });
+  });
+
+  it('does not update history when chatStream throws', async () => {
+    chatStream
+      .mockImplementationOnce(async function* () {
+        throw new Error('Ollama down');
+      })
+      .mockImplementationOnce(async function* () {
+        yield 'Hi!';
+      });
+
+    const drain = async () => {
+      for await (const _ of streamChatPipeline('first')) { /* exhaust */ }
+    };
+    await expect(drain()).rejects.toThrow('Ollama down');
+
+    for await (const _ of streamChatPipeline('second')) { /* exhaust */ }
+
+    const secondCallMessages = chatStream.mock.calls[1][1];
+    expect(secondCallMessages.filter(m => m.role === 'user')).toHaveLength(1);
+    expect(secondCallMessages).toContainEqual({ role: 'user', content: 'second' });
+  });
+
+  it('propagates errors from chatStream to the caller', async () => {
+    chatStream.mockImplementation(async function* () {
+      throw new Error('connection refused');
+    });
+
+    const drain = async () => {
+      for await (const _ of streamChatPipeline('hi')) { /* exhaust */ }
+    };
+    await expect(drain()).rejects.toThrow('connection refused');
+  });
+});
