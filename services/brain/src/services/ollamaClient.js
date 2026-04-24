@@ -37,4 +37,34 @@ async function chat(model, messages) {
   return data.message.content;
 }
 
-module.exports = { generate, chat };
+async function* chatStream(model, messages) {
+  const response = await fetch(`${BASE_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, messages, stream: true, options: GENERATION_OPTIONS }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Ollama request failed: ${response.status}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let lineBuffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    lineBuffer += decoder.decode(value, { stream: true });
+    const lines = lineBuffer.split('\n');
+    lineBuffer = lines.pop();
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const data = JSON.parse(line);
+      if (data.message?.content) yield data.message.content;
+      if (data.done) return;
+    }
+  }
+}
+
+module.exports = { generate, chat, chatStream };
