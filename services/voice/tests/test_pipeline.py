@@ -10,6 +10,12 @@ import main  # noqa: E402 — must come after sys.path setup above
 from src.brain_client import BrainServiceError
 from src.synthesizer import SynthesisError
 from src.recorder import RecordingError
+from src import state_client  # noqa: F401 — imported so mocker can patch it
+
+
+@pytest.fixture(autouse=True)
+def mock_set_state(mocker):
+    return mocker.patch('src.state_client.set_state')
 
 
 @pytest.fixture(autouse=True)
@@ -125,3 +131,61 @@ def test_pipeline_continues_when_listen_raises(mocker):
         main.run_pipeline()
 
     mock_record.assert_not_called()
+
+
+def test_pipeline_emits_correct_state_transitions_on_happy_path(mocker, mock_set_state):
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
+    mocker.patch('src.recorder.record', return_value=np.zeros(16000, dtype=np.float32))
+    mocker.patch('src.transcriber.transcribe', return_value='Hello Beemo!')
+    mocker.patch('src.brain_client.chat', return_value='Hi there!')
+    mocker.patch('src.synthesizer.synthesize', return_value=b'\x00')
+    mocker.patch('src.player.play')
+    mocker.patch('main._validate')
+
+    with pytest.raises(KeyboardInterrupt):
+        main.run_pipeline()
+
+    states = [call.args[0] for call in mock_set_state.call_args_list]
+    assert states == ['idle', 'listening', 'recording', 'transcribing', 'thinking', 'speaking', 'idle']
+
+
+def test_pipeline_emits_fallback_state_when_brain_is_down(mocker, mock_set_state):
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
+    mocker.patch('src.recorder.record', return_value=np.zeros(16000, dtype=np.float32))
+    mocker.patch('src.transcriber.transcribe', return_value='Hello!')
+    mocker.patch('src.brain_client.chat', side_effect=BrainServiceError('down'))
+    mocker.patch('src.synthesizer.synthesize', return_value=b'\x00')
+    mocker.patch('src.player.play')
+    mocker.patch('main._validate')
+
+    with pytest.raises(KeyboardInterrupt):
+        main.run_pipeline()
+
+    states = [call.args[0] for call in mock_set_state.call_args_list]
+    assert 'fallback' in states
+    assert 'speaking' not in states
+
+
+def test_pipeline_emits_error_state_when_recording_fails(mocker, mock_set_state):
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
+    mocker.patch('src.recorder.record', side_effect=RecordingError('mic disconnected'))
+    mocker.patch('main._validate')
+
+    with pytest.raises(KeyboardInterrupt):
+        main.run_pipeline()
+
+    states = [call.args[0] for call in mock_set_state.call_args_list]
+    assert 'error' in states
+
+
+def test_pipeline_emits_silent_state_when_transcription_empty(mocker, mock_set_state):
+    mocker.patch('src.wake_word.listen', side_effect=_make_listen(trigger='wake_word'))
+    mocker.patch('src.recorder.record', return_value=np.zeros(16000, dtype=np.float32))
+    mocker.patch('src.transcriber.transcribe', return_value='')
+    mocker.patch('main._validate')
+
+    with pytest.raises(KeyboardInterrupt):
+        main.run_pipeline()
+
+    states = [call.args[0] for call in mock_set_state.call_args_list]
+    assert 'silent' in states
