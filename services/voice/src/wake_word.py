@@ -51,9 +51,14 @@ def listen() -> str:
             if result_queue.empty():
                 result_queue.put('error')
 
-    wake_thread = threading.Thread(target=_wake_word_thread, daemon=True)
     hotkey = keyboard.add_hotkey(config.PTT_KEY, lambda: result_queue.put('ptt') if result_queue.empty() else None)
-    wake_thread.start()
+
+    if config.WAKE_WORD_MODEL:
+        wake_thread = threading.Thread(target=_wake_word_thread, daemon=True)
+        wake_thread.start()
+    else:
+        log.info('No wake word model configured — PTT only (press [%s])', config.PTT_KEY)
+        wake_thread = None
 
     try:
         result = result_queue.get(timeout=LISTEN_TIMEOUT)
@@ -63,7 +68,8 @@ def listen() -> str:
     finally:
         stop_event.set()
         keyboard.remove_hotkey(hotkey)
-        wake_thread.join(timeout=1.0)
+        if wake_thread:
+            wake_thread.join(timeout=1.0)
 
     if result == 'error':
         raise RuntimeError('Wake word detection failed — check hardware and model config')
