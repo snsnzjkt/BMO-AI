@@ -1,6 +1,7 @@
 import json
 import httpx
 import config
+from collections.abc import Iterator
 
 
 class BrainServiceError(Exception):
@@ -24,7 +25,7 @@ def chat(text: str) -> str:
         raise BrainServiceError(f'Brain service unreachable: {e}') from e
 
 
-def stream_chat(text: str):
+def stream_chat(text: str) -> Iterator[str]:
     try:
         with httpx.stream(
             'POST',
